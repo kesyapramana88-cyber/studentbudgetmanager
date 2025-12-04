@@ -1,4 +1,6 @@
-document.getElementById("resetData").onclick = ()=>{
-  localStorage.clear();
-  alert("Data direset!");
+
+function bindPengaturan(){
+  document.getElementById('resetBtn').addEventListener('click', ()=>{
+    if(confirm('Reset semua data?')){ localStorage.clear(); location.href='index.html'; }
+  });
 }

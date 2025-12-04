@@ -1,27 +1,34 @@
-let kategori = JSON.parse(localStorage.getItem("kategori")||"[]");
-let pemasukan = JSON.parse(localStorage.getItem("pemasukan")||"[]");
-let pengeluaran = JSON.parse(localStorage.getItem("pengeluaran")||"[]");
 
-let select = document.getElementById("kategori");
-kategori.forEach(k => {
-  let opt = document.createElement("option");
-  opt.value = k; opt.textContent = k;
-  select.appendChild(opt);
-});
+function bindTambah(){
+  populateCategoryElements();
+  const catSelect = document.getElementById('kategori');
+  const noteInput = document.getElementById('catatan');
+  const suggestion = document.getElementById('suggestion');
 
-document.getElementById("formTransaksi").addEventListener("submit", e=>{
-  e.preventDefault();
-  let data = {
-    jenis: document.getElementById("jenis").value,
-    jumlah: parseInt(document.getElementById("jumlah").value),
-    kategori: document.getElementById("kategori").value,
-    tanggal: new Date().toLocaleDateString()
-  };
-  if(data.jenis==="pemasukan") pemasukan.push(data);
-  else pengeluaran.push(data);
+  noteInput.addEventListener('input', ()=>{
+    const text = noteInput.value.toLowerCase();
+    const data = JSON.parse(localStorage.getItem('sbm_cat_v2') || '[]');
+    let best = null; let bestScore=0;
+    data.forEach(c=>{
+      let score = 0;
+      c.keywords.forEach(k=>{ if(k && text.includes(k)) score++; });
+      if(score>bestScore){ bestScore=score; best=c; }
+    });
+    suggestion.textContent = best?best.name:'-';
+  });
 
-  localStorage.setItem("pemasukan", JSON.stringify(pemasukan));
-  localStorage.setItem("pengeluaran", JSON.stringify(pengeluaran));
-
-  alert("Tersimpan!");
-});
+  document.getElementById('formTransaksi').addEventListener('submit', e=>{
+    e.preventDefault();
+    const jenis = document.getElementById('jenis').value;
+    const kategori = document.getElementById('kategori').value || null;
+    const jumlah = Number(document.getElementById('jumlah').value || 0);
+    const note = document.getElementById('catatan').value || '';
+    if(!jumlah || jumlah<=0){ alert('Masukkan jumlah valid'); return; }
+    const data = JSON.parse(localStorage.getItem('sbm_tx_v2')||'[]');
+    const id = 't_'+Date.now();
+    data.push({id:id,type:jenis,amount:jumlah,category:kategori,note:note,date:new Date().toISOString()});
+    localStorage.setItem('sbm_tx_v2', JSON.stringify(data));
+    alert('Transaksi tersimpan');
+    window.location.href='index.html';
+  });
+}
